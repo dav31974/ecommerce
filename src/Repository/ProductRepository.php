@@ -3,8 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Product;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Data\SearchData;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Product|null find($id, $lockMode = null, $lockVersion = null)
@@ -23,8 +24,42 @@ class ProductRepository extends ServiceEntityRepository
      * Récupère les produits en lien avec la recherche
      * @return Product[]
      */
-    public function findSearch(): array
+    public function findSearch(SearchData $search): array
     {
-        return $this->findAll();
+        $query = $this
+            ->createQueryBuilder('p')
+            ->select('c', 'p')
+            ->join('p.categories', 'c');
+        
+            if (!empty($search->q)) {
+                $query = $query
+                    ->andWhere('p.name LIKE :q')
+                    ->setParameter('q', "%{$search->q}%");
+            }
+
+            if (!empty($search->min)) {
+                $query = $query
+                    ->andWhere('p.price LIKE >= :min')
+                    ->setParameter('min', $search->min);
+            }
+
+            if (!empty($search->max)) {
+                $query = $query
+                    ->andWhere('p.price LIKE <= :max')
+                    ->setParameter('max', $search->max);
+            }
+
+            if (!empty($search->promo)) {
+                $query = $query
+                    ->andWhere('p.promo LIKE = 1');
+            }
+
+            if (!empty($search->categories)) {
+                $query = $query
+                    ->andWhere('c.id IN (:categories)')
+                    ->setParameter('categories', $search->categories);
+            }
+
+        return $query->getQuery()->getResult();
     }
 }

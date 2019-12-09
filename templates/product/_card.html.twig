@@ -9,5 +9,10 @@
             {% endif %}
         </div>
         <p class="text text-muted">{{ product.description }}</p>
+        <div>
+            {% for c in product.categories %}
+                <em class="text-muted text-primary text-italic">#{{ c.name }}</em>
+            {% endfor %}
+        </div>
     </div>
 </div>

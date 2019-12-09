@@ -11,10 +11,20 @@
                 grid-template-columns: repeat(3, 1fr);
                 grid-gap: 20px;
             }
+            .filter {
+                display: block;
+                position: sticky !important;
+                top: 20px;
+            }
         </style>
     </head>
     <body>
+    <nav class="navbar-dark bg-primary mb-2">
+        <a href="/" class="navbar-brand mb-0 h1 ml-2">Commerce</a>
+    </nav>
+    <div>
         {% block body %}{% endblock %}
+    </div>
         {% block javascripts %}{% endblock %}
     </body>
 </html>
