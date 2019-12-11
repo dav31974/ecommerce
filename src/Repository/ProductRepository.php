@@ -4,8 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Product;
 use App\Data\SearchData;
+use Knp\Component\Pager\PaginatorInterface;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 
 /**
  * @method Product|null find($id, $lockMode = null, $lockVersion = null)
@@ -15,16 +17,17 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  */
 class ProductRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, PaginatorInterface $paginator)
     {
         parent::__construct($registry, Product::class);
+        $this->paginator = $paginator;
     }
 
     /**
      * Récupère les produits en lien avec la recherche
-     * @return Product[]
+     * @return PaginationInterface
      */
-    public function findSearch(SearchData $search): array
+    public function findSearch(SearchData $search): PaginationInterface
     {
         $query = $this
             ->createQueryBuilder('p')
@@ -39,19 +42,19 @@ class ProductRepository extends ServiceEntityRepository
 
             if (!empty($search->min)) {
                 $query = $query
-                    ->andWhere('p.price LIKE >= :min')
+                    ->andWhere('p.price >= :min')
                     ->setParameter('min', $search->min);
             }
 
             if (!empty($search->max)) {
                 $query = $query
-                    ->andWhere('p.price LIKE <= :max')
+                    ->andWhere('p.price <= :max')
                     ->setParameter('max', $search->max);
             }
 
             if (!empty($search->promo)) {
                 $query = $query
-                    ->andWhere('p.promo LIKE = 1');
+                    ->andWhere('p.promo = 1');
             }
 
             if (!empty($search->categories)) {
@@ -60,6 +63,11 @@ class ProductRepository extends ServiceEntityRepository
                     ->setParameter('categories', $search->categories);
             }
 
-        return $query->getQuery()->getResult();
+        $query = $query->getQuery();
+        return $this->paginator->paginate(
+            $query,
+            $search->page,
+            9
+        );
     }
 }

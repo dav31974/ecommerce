@@ -17,6 +17,7 @@ class ProductController extends AbstractController
     public function index(ProductRepository $repository, Request $request)
     {
         $data = new SearchData();
+        $data->page = $request->get('page', 1);
         $form = $this->createForm(SearchForm::class, $data);
         $form->handleRequest($request);
         $products = $repository->findSearch($data);

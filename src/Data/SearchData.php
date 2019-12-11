@@ -7,6 +7,13 @@ class SearchData
     /**
      * Undocumented variable
      *
+     * @var int
+     */
+    public $page = 1;
+
+    /**
+     * Undocumented variable
+     *
      * @var string
      */
     public $q = '';
